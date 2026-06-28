@@ -12,12 +12,14 @@ function initGame() {
 }
 
 function addToAnswer(char, btn) {
-    btn.style.opacity = '0.5';
+    btn.style.visibility = 'hidden'; // Скрываем букву на панели, как будто мы её "взяли"
     currentAnswer.push(char);
+    
     const answerDiv = document.getElementById('answer');
-    const span = document.createElement('span');
-    span.innerText = char;
-    answerDiv.appendChild(span);
+    const slot = document.createElement('div');
+    slot.className = 'letter-slot';
+    slot.innerText = char;
+    answerDiv.appendChild(slot);
 }
 
 function checkWord() {
