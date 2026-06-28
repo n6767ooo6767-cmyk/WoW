@@ -1,0 +1,36 @@
+body {
+    font-family: 'Segoe UI', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #f0f2f5;
+    padding: 20px;
+}
+
+.letters-container, .answer-container {
+    margin: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+button {
+    padding: 15px 25px;
+    font-size: 20px;
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: 0.2s;
+}
+
+button:active { transform: scale(0.95); }
+
+.correct { background: #4caf50 !important; color: white; }
+.wrong { animation: shake 0.3s; background: #f44336 !important; color: white; }
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
