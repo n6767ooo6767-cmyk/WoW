@@ -1,44 +1,39 @@
-#!/usr/bin/env node
-const { execSync } = require('child_process');
-const { OpenAI } = require('openai');
-const { Command } = require('commander');
+const sourceWord = "КАТАР";
+let currentAnswer = [];
 
-const program = new Command();
-const openai = new OpenAI({ apiKey: 'ТВОЙ_OPENAI_API_KEY' });
-
-program.action(async () => {
-  try {
-    // Получаем изменения, которые добавлены в stage
-    const diff = execSync('git diff --cached').toString();
-    
-    if (!diff) {
-      console.log('Нет изменений для коммита!');
-      return;
-    }
-
-    console.log('Думаю над коммитом...');
-
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [{
-        role: "system",
-        content: "Ты — профессиональный разработчик. Напиши краткое и точное сообщение для git commit на основе diff. Используй Conventional Commits (fix:, feat:, refactor: и т.д.). Только текст коммита, без кавычек и лишних слов."
-      }, {
-        role: "user",
-        content: diff
-      }],
+function initGame() {
+    const container = document.getElementById('letters');
+    sourceWord.split('').forEach((char, index) => {
+        const btn = document.createElement('button');
+        btn.innerText = char;
+        btn.onclick = () => addToAnswer(char, btn);
+        container.appendChild(btn);
     });
+}
 
-    const commitMessage = completion.choices[0].message.content.trim();
-    console.log(`\nПредлагаю: ${commitMessage}`);
-    
-    // Автоматический коммит
-    execSync(`git commit -m "${commitMessage.replace(/"/g, '\\"')}"`);
-    console.log('✅ Готово!');
-    
-  } catch (err) {
-    console.error('Ошибка:', err.message);
-  }
-});
+function addToAnswer(char, btn) {
+    btn.style.opacity = '0.5';
+    currentAnswer.push(char);
+    const answerDiv = document.getElementById('answer');
+    const span = document.createElement('span');
+    span.innerText = char;
+    answerDiv.appendChild(span);
+}
 
-program.parse();
+function checkWord() {
+    const word = currentAnswer.join('');
+    const answerDiv = document.getElementById('answer');
+    
+    // Простая проверка: если слово есть в "базе" (можно дополнить массив)
+    const validWords = ["ТАК", "РАТ", "КАРА", "ТРАК"];
+    
+    if (validWords.includes(word)) {
+        answerDiv.className = 'correct';
+        alert('Правильно!');
+    } else {
+        answerDiv.className = 'wrong';
+        setTimeout(() => answerDiv.className = '', 500);
+    }
+}
+
+initGame();
