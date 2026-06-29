@@ -4,87 +4,77 @@
     <meta charset="UTF-8">
     <title>Угадай страну</title>
     <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; padding: 20px; background: #f0f2f5; }
-        .container { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
-        #emoji { font-size: 80px; margin: 20px 0; animation: bounce 2s infinite ease-in-out; }
-        button { width: 100%; padding: 12px; margin: 6px 0; border: none; border-radius: 8px; background: #eee; cursor: pointer; transition: 0.2s; font-weight: bold; }
-        button:active { transform: scale(0.97); }
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        :root { --primary: #007AFF; --bg: #f0f2f5; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background-color: var(--bg); }
+        
+        .container { 
+            background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px);
+            padding: 40px; border-radius: 28px; box-shadow: 0 20px 40px rgba(0,0,0,0.08); 
+            width: 90%; max-width: 420px; text-align: center; border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        #cat-name { font-size: 14px; font-weight: 600; color: var(--primary); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 20px; }
+        #emoji { font-size: 80px; margin: 10px 0 30px; animation: pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        button { 
+            width: 100%; padding: 16px; margin: 10px 0; border: none; border-radius: 16px; 
+            background: #f2f2f7; cursor: pointer; transition: all 0.25s ease; 
+            font-size: 16px; font-weight: 500; color: #1c1c1e;
+        }
+        button:hover { background: #e5e5ea; transform: translateY(-2px); }
+        button:active { transform: scale(0.98); }
+
+        @keyframes pop { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="cat-name" style="font-weight:bold; color:#0070f3;"></div>
+    <div id="cat-name"></div>
     <div id="emoji"></div>
     <div id="options"></div>
 </div>
 
 <script>
+    // База вопросов (те же данные, что были)
     const db = {
-        "Гастрономия": [
-            {e:"🍣", a:"Япония"}, {e:"🍕", a:"Италия"}, {e:"🌮", a:"Мексика"}, {e:"🍔", a:"США"}, {e:"🥘", a:"Испания"},
-            {e:"🥨", a:"Германия"}, {e:"🥐", a:"Франция"}, {e:"🍛", a:"Индия"}, {e:"🍜", a:"Китай"}, {e:"🧇", a:"Бельгия"},
-            {e:"🥙", a:"Турция"}, {e:"🧉", a:"Аргентина"}, {e:"🍱", a:"Южная Корея"}, {e:"🥗", a:"Греция"}, {e:"🍩", a:"Канада"},
-            {e:"🫕", a:"Швейцария"}, {e:"🥟", a:"Вьетнам"}, {e:"🍺", a:"Чехия"}, {e:"🍷", a:"Португалия"}, {e:"🥥", a:"Таиланд"}
-        ],
-        "Природа": [
-            {e:"🦘", a:"Австралия"}, {e:"🐼", a:"Китай"}, {e:"🐘", a:"Индия"}, {e:"🐧", a:"Антарктида"}, {e:"🦁", a:"Кения"},
-            {e:"🐻", a:"Россия"}, {e:"🦙", a:"Перу"}, {e:"🥝", a:"Новая Зеландия"}, {e:"🐪", a:"Египет"}, {e:"🦅", a:"США"},
-            {e:"🦓", a:"Танзания"}, {e:"🦊", a:"Япония"}, {e:"🦞", a:"Канада"}, {e:"🐒", a:"Бразилия"}, {e:"🦌", a:"Норвегия"},
-            {e:"🌵", a:"Мексика"}, {e:"❄️", a:"Гренландия"}, {e:"🌋", a:"Исландия"}, {e:"🐎", a:"Монголия"}, {e:"🦈", a:"ЮАР"}
-        ],
-        "Флаги": [
-            {e:"🇯🇵", a:"Япония"}, {e:"🇮🇹", a:"Италия"}, {e:"🇲🇽", a:"Мексика"}, {e:"🇺🇸", a:"США"}, {e:"🇪🇸", a:"Испания"},
-            {e:"🇩🇪", a:"Германия"}, {e:"🇫🇷", a:"Франция"}, {e:"🇮🇳", a:"Индия"}, {e:"🇨🇳", a:"Китай"}, {e:"🇧🇪", a:"Бельгия"},
-            {e:"🇹🇷", a:"Турция"}, {e:"🇦🇷", a:"Аргентина"}, {e:"🇰🇷", a:"Южная Корея"}, {e:"🇬🇷", a:"Греция"}, {e:"🇨🇦", a:"Канада"},
-            {e:"🇨🇭", a:"Швейцария"}, {e:"🇻🇳", a:"Вьетнам"}, {e:"🇨🇿", a:"Чехия"}, {e:"🇵🇹", a:"Португалия"}, {e:"🇹🇭", a:"Таиланд"}
-        ],
-        "Места": [
-            {e:"🗽", a:"США"}, {e:"🗼", a:"Франция"}, {e:"🏟️", a:"Италия"}, {e:"🏯", a:"Япония"}, {e:"🕌", a:"Турция"},
-            {e:"⛩️", a:"Япония"}, {e:"🗿", a:"Чили"}, {e:"🏛️", a:"Греция"}, {e:"🏰", a:"Германия"}, {e:"🎡", a:"Великобритания"},
-            {e:"🏔️", a:"Швейцария"}, {e:"🛳️", a:"Норвегия"}, {e:"🏜️", a:"Иордания"}, {e:"⛲", a:"Испания"}, {e:"⛪", a:"Россия"},
-            {e:"🏮", a:"Китай"}, {e:"🎭", a:"Австрия"}, {e:"🛸", a:"ОАЭ"}, {e:"🧗", a:"Непал"}, {e:"🛳️", a:"Нидерланды"}
-        ]
+        "Гастрономия": [{e:"🍣", a:"Япония"}, {e:"🍕", a:"Италия"}, {e:"🌮", a:"Мексика"}, {e:"🍔", a:"США"}, {e:"🥘", a:"Испания"}, {e:"🥨", a:"Германия"}, {e:"🥐", a:"Франция"}, {e:"🍛", a:"Индия"}, {e:"🍜", a:"Китай"}, {e:"🧇", a:"Бельгия"}, {e:"🥙", a:"Турция"}, {e:"🧉", a:"Аргентина"}, {e:"🍱", a:"Южная Корея"}, {e:"🥗", a:"Греция"}, {e:"🍩", a:"Канада"}, {e:"🫕", a:"Швейцария"}, {e:"🥟", a:"Вьетнам"}, {e:"🍺", a:"Чехия"}, {e:"🍷", a:"Португалия"}, {e:"🥥", a:"Таиланд"}],
+        "Природа": [{e:"🦘", a:"Австралия"}, {e:"🐼", a:"Китай"}, {e:"🐘", a:"Индия"}, {e:"🐧", a:"Антарктида"}, {e:"🦁", a:"Кения"}, {e:"🐻", a:"Россия"}, {e:"🦙", a:"Перу"}, {e:"🥝", a:"Новая Зеландия"}, {e:"🐪", a:"Египет"}, {e:"🦅", a:"США"}, {e:"🦓", a:"Танзания"}, {e:"🦊", a:"Япония"}, {e:"🦞", a:"Канада"}, {e:"🐒", a:"Бразилия"}, {e:"🦌", a:"Норвегия"}, {e:"🌵", a:"Мексика"}, {e:"❄️", a:"Гренландия"}, {e:"🌋", a:"Исландия"}, {e:"🐎", a:"Монголия"}, {e:"🦈", a:"ЮАР"}],
+        "Флаги": [{e:"🇯🇵", a:"Япония"}, {e:"🇮🇹", a:"Италия"}, {e:"🇲🇽", a:"Мексика"}, {e:"🇺🇸", a:"США"}, {e:"🇪🇸", a:"Испания"}, {e:"🇩🇪", a:"Германия"}, {e:"🇫🇷", a:"Франция"}, {e:"🇮🇳", a:"Индия"}, {e:"🇨🇳", a:"Китай"}, {e:"🇧🇪", a:"Бельгия"}, {e:"🇹🇷", a:"Турция"}, {e:"🇦🇷", a:"Аргентина"}, {e:"🇰🇷", a:"Южная Корея"}, {e:"🇬🇷", a:"Греция"}, {e:"🇨🇦", a:"Канада"}, {e:"🇨🇭", a:"Швейцария"}, {e:"🇻🇳", a:"Вьетнам"}, {e:"🇨🇿", a:"Чехия"}, {e:"🇵🇹", a:"Португалия"}, {e:"🇹🇭", a:"Таиланд"}],
+        "Места": [{e:"🗽", a:"США"}, {e:"🗼", a:"Франция"}, {e:"🏟️", a:"Италия"}, {e:"🏯", a:"Япония"}, {e:"🕌", a:"Турция"}, {e:"⛩️", a:"Япония"}, {e:"🗿", a:"Чили"}, {e:"🏛️", a:"Греция"}, {e:"🏰", a:"Германия"}, {e:"🎡", a:"Великобритания"}, {e:"🏔️", a:"Швейцария"}, {e:"🛳️", a:"Норвегия"}, {e:"🏜️", a:"Иордания"}, {e:"⛲", a:"Испания"}, {e:"⛪", a:"Россия"}, {e:"🏮", a:"Китай"}, {e:"🎭", a:"Австрия"}, {e:"🛸", a:"ОАЭ"}, {e:"🧗", a:"Непал"}, {e:"🛳️", a:"Нидерланды"}]
     };
 
     let queue = [];
-
     function nextQuestion() {
         if (queue.length === 0) {
-            Object.keys(db).forEach(cat => {
-                db[cat].forEach(item => queue.push({...item, cat}));
-            });
+            Object.keys(db).forEach(cat => db[cat].forEach(i => queue.push({...i, cat})));
             queue.sort(() => Math.random() - 0.5);
         }
-
         const current = queue.pop();
         document.getElementById('cat-name').innerText = current.cat;
         document.getElementById('emoji').innerText = current.e;
-
+        
         const optionsDiv = document.getElementById('options');
         optionsDiv.innerHTML = '';
-        
         let answers = [current.a];
-        let allCountries = [...new Set(Object.values(db).flat().map(i => i.a))];
+        let all = [...new Set(Object.values(db).flat().map(i => i.a))];
         while(answers.length < 4) {
-            let rand = allCountries[Math.floor(Math.random() * allCountries.length)];
-            if(!answers.includes(rand)) answers.push(rand);
+            let r = all[Math.floor(Math.random() * all.length)];
+            if(!answers.includes(r)) answers.push(r);
         }
         answers.sort(() => Math.random() - 0.5);
-
+        
         answers.forEach(ans => {
             const btn = document.createElement('button');
             btn.innerText = ans;
             btn.onclick = () => {
-                btn.style.background = (ans === current.a) ? "#28a745" : "#dc3545";
+                btn.style.background = (ans === current.a) ? "#34C759" : "#FF3B30";
                 btn.style.color = "white";
-                setTimeout(nextQuestion, 600);
+                setTimeout(nextQuestion, 500);
             };
             optionsDiv.appendChild(btn);
         });
     }
-
     nextQuestion();
 </script>
 </body>
