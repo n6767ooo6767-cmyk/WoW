@@ -1,25 +1,66 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <script>
-    const API_KEY = ''; 
-    </script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Студия</title>
-    <link rel="stylesheet" href="style.css">
-    <!-- Скрипт конфигурации, создаваемый автоматически через GitHub Actions -->
-    <script src="config.js"></script>
+    <title>Угадай страну по эмодзи</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; padding: 40px; background: #f0f2f5; }
+        .container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        
+        #emoji-display { font-size: 80px; margin: 30px 0; animation: bounce 2s infinite ease-in-out; }
+        
+        button { width: 100%; padding: 15px; margin: 8px 0; border: none; border-radius: 10px; background: #0070f3; color: white; cursor: pointer; transition: transform 0.2s, background 0.3s; font-weight: bold; }
+        button:hover { background: #0051b3; }
+        button:active { transform: scale(0.95); }
+
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        
+        .result-anim { animation: fadeInScale 0.5s ease-out; font-weight: bold; margin-top: 20px; }
+        @keyframes fadeInScale { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>AI Арт-Студия</h1>
-        <textarea id="prompt-input" placeholder="Опиши свою мечту..."></textarea>
-        <button id="generate-btn">Создать с ИИ</button>
-        <div id="result-area">
-            <p id="ai-message">Результат появится здесь...</p>
-        </div>
-    </div>
-    <script src="script.js"></script>
+
+<div class="container">
+    <h1>Угадай страну! 🌍</h1>
+    <div id="emoji-display"></div>
+    <div id="options"></div>
+    <p id="result" class="result-anim"></p>
+</div>
+
+<script>
+    // Ключ вставится через GitHub Actions
+    const API_KEY = ''; 
+
+    const data = [
+        { emoji: "🍣🇯🇵", answer: "Япония" },
+        { emoji: "🍕🇮🇹", answer: "Италия" },
+        { emoji: "🌮🇲🇽", answer: "Мексика" },
+        { emoji: "🍔🇺🇸", answer: "США" }
+    ];
+
+    let current = data[Math.floor(Math.random() * data.length)];
+
+    function init() {
+        document.getElementById('emoji-display').innerText = current.emoji;
+        const optionsDiv = document.getElementById('options');
+        optionsDiv.innerHTML = '';
+        
+        data.forEach(item => {
+            const btn = document.createElement('button');
+            btn.innerText = item.answer;
+            btn.onclick = () => {
+                const res = document.getElementById('result');
+                res.innerText = (item.answer === current.answer) ? "Верно! 🎉" : "Ошибка! ❌";
+                res.style.color = (item.answer === current.answer) ? "#28a745" : "#dc3545";
+                
+                setTimeout(() => location.reload(), 1500);
+            };
+            optionsDiv.appendChild(btn);
+        });
+    }
+
+    init();
+</script>
 </body>
 </html>
