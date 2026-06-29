@@ -1,49 +1,22 @@
-// Просто добавь сюда 300 слов, и игра готова
-const wordPool = ["КАТАР", "МОЛОКО", "АРБУЗ", "КОМПЬЮТЕР", "МАШИНА", "СЕРИАЛ", "БАНШИ", "КОД", "ИГРА", "ЛЕВЕЛ", "КРУТО", "ПИСТОЛЕТ", "ПРИКОЛЛЬНО", "ЛИСИЧКА", "ТЕКСТ", "ПРИВЕТ", "СОЗДАНИЕ", "ЛИЧИКО", "НОСОЧКИ", "ДОЛГИ НА 100", "ЛОЖКА"]; 
-let currentLevelIndex = 0;
-let currentAnswer = [];
-
-function loadLevel() {
-    if (currentLevelIndex >= wordPool.length) {
-        alert("Поздравляю! Ты прошел все 300 уровней!");
-        return;
-    }
-    
-    const word = wordPool[currentLevelIndex];
-    // Перемешиваем буквы для интереса
-    const letters = word.split('').sort(() => Math.random() - 0.5);
-    
-    const container = document.getElementById('letters');
-    container.innerHTML = '';
-    
-    letters.forEach(char => {
-        const btn = document.createElement('button');
-        btn.innerText = char;
-        btn.onclick = () => {
-            currentAnswer.push(char);
-            document.getElementById('answer').innerText = currentAnswer.join('');
-            btn.style.visibility = "hidden"; // "Использовано"
-        };
-        container.appendChild(btn);
-    });
-}
-
-// Теперь функция проверки просто сравнивает с оригиналом
-function checkWord() {
-    const word = currentAnswer.join('');
-    if (word === wordPool[currentLevelIndex]) {
-        alert("Верно! Уровень " + (currentLevelIndex + 1) + " пройден.");
-        currentLevelIndex++;
-        currentAnswer = [];
-        document.getElementById('answer').innerText = "";
-        loadLevel();
-    } else {
-        alert("Неверно! Попробуй еще.");
-        // Сброс
-        currentAnswer = [];
-        document.getElementById('answer').innerText = "";
-        document.querySelectorAll('#letters button').forEach(b => b.style.visibility = "visible");
-    }
-}
-
-loadLevel();
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Студия</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Скрипт конфигурации, создаваемый автоматически через GitHub Actions -->
+    <script src="config.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Арт-Студия</h1>
+        <textarea id="prompt-input" placeholder="Опиши свою мечту..."></textarea>
+        <button id="generate-btn">Создать с ИИ</button>
+        <div id="result-area">
+            <p id="ai-message">Результат появится здесь...</p>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
