@@ -12,8 +12,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Create config file
-        run: echo "const API_KEY = '${{ secrets.OPEN_ROUTER_API_KEY }}';" > config.js
+      - name: Inject API Key
+        run: |
+          sed -i "s/const API_KEY = '';/const API_KEY = '${{ secrets.OPEN_ROUTER_API_KEY }}';/g" index.html
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
