@@ -2,65 +2,90 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Угадай страну по эмодзи</title>
+    <title>Угадай страну</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; padding: 40px; background: #f0f2f5; }
-        .container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
-        
-        #emoji-display { font-size: 80px; margin: 30px 0; animation: bounce 2s infinite ease-in-out; }
-        
-        button { width: 100%; padding: 15px; margin: 8px 0; border: none; border-radius: 10px; background: #0070f3; color: white; cursor: pointer; transition: transform 0.2s, background 0.3s; font-weight: bold; }
-        button:hover { background: #0051b3; }
-        button:active { transform: scale(0.95); }
-
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
-        
-        .result-anim { animation: fadeInScale 0.5s ease-out; font-weight: bold; margin-top: 20px; }
-        @keyframes fadeInScale { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+        body { font-family: sans-serif; display: flex; justify-content: center; padding: 20px; background: #f0f2f5; }
+        .container { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        #emoji { font-size: 80px; margin: 20px 0; animation: bounce 2s infinite ease-in-out; }
+        button { width: 100%; padding: 12px; margin: 6px 0; border: none; border-radius: 8px; background: #eee; cursor: pointer; transition: 0.2s; font-weight: bold; }
+        button:active { transform: scale(0.97); }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Угадай страну! 🌍</h1>
-    <div id="emoji-display"></div>
+    <div id="cat-name" style="font-weight:bold; color:#0070f3;"></div>
+    <div id="emoji"></div>
     <div id="options"></div>
-    <p id="result" class="result-anim"></p>
 </div>
 
 <script>
-    // Ключ вставится через GitHub Actions
-    const API_KEY = ''; 
+    const db = {
+        "Гастрономия": [
+            {e:"🍣", a:"Япония"}, {e:"🍕", a:"Италия"}, {e:"🌮", a:"Мексика"}, {e:"🍔", a:"США"}, {e:"🥘", a:"Испания"},
+            {e:"🥨", a:"Германия"}, {e:"🥐", a:"Франция"}, {e:"🍛", a:"Индия"}, {e:"🍜", a:"Китай"}, {e:"🧇", a:"Бельгия"},
+            {e:"🥙", a:"Турция"}, {e:"🧉", a:"Аргентина"}, {e:"🍱", a:"Южная Корея"}, {e:"🥗", a:"Греция"}, {e:"🍩", a:"Канада"},
+            {e:"🫕", a:"Швейцария"}, {e:"🥟", a:"Вьетнам"}, {e:"🍺", a:"Чехия"}, {e:"🍷", a:"Португалия"}, {e:"🥥", a:"Таиланд"}
+        ],
+        "Природа": [
+            {e:"🦘", a:"Австралия"}, {e:"🐼", a:"Китай"}, {e:"🐘", a:"Индия"}, {e:"🐧", a:"Антарктида"}, {e:"🦁", a:"Кения"},
+            {e:"🐻", a:"Россия"}, {e:"🦙", a:"Перу"}, {e:"🥝", a:"Новая Зеландия"}, {e:"🐪", a:"Египет"}, {e:"🦅", a:"США"},
+            {e:"🦓", a:"Танзания"}, {e:"🦊", a:"Япония"}, {e:"🦞", a:"Канада"}, {e:"🐒", a:"Бразилия"}, {e:"🦌", a:"Норвегия"},
+            {e:"🌵", a:"Мексика"}, {e:"❄️", a:"Гренландия"}, {e:"🌋", a:"Исландия"}, {e:"🐎", a:"Монголия"}, {e:"🦈", a:"ЮАР"}
+        ],
+        "Флаги": [
+            {e:"🇯🇵", a:"Япония"}, {e:"🇮🇹", a:"Италия"}, {e:"🇲🇽", a:"Мексика"}, {e:"🇺🇸", a:"США"}, {e:"🇪🇸", a:"Испания"},
+            {e:"🇩🇪", a:"Германия"}, {e:"🇫🇷", a:"Франция"}, {e:"🇮🇳", a:"Индия"}, {e:"🇨🇳", a:"Китай"}, {e:"🇧🇪", a:"Бельгия"},
+            {e:"🇹🇷", a:"Турция"}, {e:"🇦🇷", a:"Аргентина"}, {e:"🇰🇷", a:"Южная Корея"}, {e:"🇬🇷", a:"Греция"}, {e:"🇨🇦", a:"Канада"},
+            {e:"🇨🇭", a:"Швейцария"}, {e:"🇻🇳", a:"Вьетнам"}, {e:"🇨🇿", a:"Чехия"}, {e:"🇵🇹", a:"Португалия"}, {e:"🇹🇭", a:"Таиланд"}
+        ],
+        "Места": [
+            {e:"🗽", a:"США"}, {e:"🗼", a:"Франция"}, {e:"🏟️", a:"Италия"}, {e:"🏯", a:"Япония"}, {e:"🕌", a:"Турция"},
+            {e:"⛩️", a:"Япония"}, {e:"🗿", a:"Чили"}, {e:"🏛️", a:"Греция"}, {e:"🏰", a:"Германия"}, {e:"🎡", a:"Великобритания"},
+            {e:"🏔️", a:"Швейцария"}, {e:"🛳️", a:"Норвегия"}, {e:"🏜️", a:"Иордания"}, {e:"⛲", a:"Испания"}, {e:"⛪", a:"Россия"},
+            {e:"🏮", a:"Китай"}, {e:"🎭", a:"Австрия"}, {e:"🛸", a:"ОАЭ"}, {e:"🧗", a:"Непал"}, {e:"🛳️", a:"Нидерланды"}
+        ]
+    };
 
-    const data = [
-        { emoji: "🍣🇯🇵", answer: "Япония" },
-        { emoji: "🍕🇮🇹", answer: "Италия" },
-        { emoji: "🌮🇲🇽", answer: "Мексика" },
-        { emoji: "🍔🇺🇸", answer: "США" }
-    ];
+    let queue = [];
 
-    let current = data[Math.floor(Math.random() * data.length)];
+    function nextQuestion() {
+        if (queue.length === 0) {
+            Object.keys(db).forEach(cat => {
+                db[cat].forEach(item => queue.push({...item, cat}));
+            });
+            queue.sort(() => Math.random() - 0.5);
+        }
 
-    function init() {
-        document.getElementById('emoji-display').innerText = current.emoji;
+        const current = queue.pop();
+        document.getElementById('cat-name').innerText = current.cat;
+        document.getElementById('emoji').innerText = current.e;
+
         const optionsDiv = document.getElementById('options');
         optionsDiv.innerHTML = '';
         
-        data.forEach(item => {
+        let answers = [current.a];
+        let allCountries = [...new Set(Object.values(db).flat().map(i => i.a))];
+        while(answers.length < 4) {
+            let rand = allCountries[Math.floor(Math.random() * allCountries.length)];
+            if(!answers.includes(rand)) answers.push(rand);
+        }
+        answers.sort(() => Math.random() - 0.5);
+
+        answers.forEach(ans => {
             const btn = document.createElement('button');
-            btn.innerText = item.answer;
+            btn.innerText = ans;
             btn.onclick = () => {
-                const res = document.getElementById('result');
-                res.innerText = (item.answer === current.answer) ? "Верно! 🎉" : "Ошибка! ❌";
-                res.style.color = (item.answer === current.answer) ? "#28a745" : "#dc3545";
-                
-                setTimeout(() => location.reload(), 1500);
+                btn.style.background = (ans === current.a) ? "#28a745" : "#dc3545";
+                btn.style.color = "white";
+                setTimeout(nextQuestion, 600);
             };
             optionsDiv.appendChild(btn);
         });
     }
 
-    init();
+    nextQuestion();
 </script>
 </body>
 </html>
